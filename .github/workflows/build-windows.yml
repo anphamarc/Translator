@@ -1,0 +1,64 @@
+name: Build Windows app
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, "claude/**"]
+    tags: ["v*"]
+    paths-ignore: ["**.md"]
+
+permissions:
+  contents: write  # de dang ban phat hanh (release) khi day tag v*
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt pyinstaller
+
+      - name: Unit tests
+        run: python -m pytest -q
+
+      - name: Build with PyInstaller
+        working-directory: packaging
+        run: pyinstaller translator.spec --noconfirm --distpath ../dist --workpath ../build
+
+      - name: Download models into the bundle (offline use)
+        env:
+          TRANSLATOR_DATA_DIR: ${{ github.workspace }}\dist\Translator\data
+        run: python -m translator_app.models
+
+      - name: Self-test the packaged app (real translation + OCR)
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath dist\Translator\Translator.exe -ArgumentList "--selftest" -Wait -PassThru
+          Get-Content dist\Translator\data\selftest.log -Encoding utf8
+          Remove-Item dist\Translator\data\selftest.log
+          if ($p.ExitCode -ne 0) { exit 1 }
+
+      - name: Zip
+        run: 7z a -tzip -mx=5 Translator-windows.zip .\dist\Translator
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Translator-windows
+          path: Translator-windows.zip
+          retention-days: 30
+          compression-level: 0
+
+      - name: Publish release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Translator-windows.zip

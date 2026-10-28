@@ -11,21 +11,23 @@
 
 Dịch Hàn ↔ Việt được thực hiện qua trung gian tiếng Anh.
 
-## Cài đặt trên Windows
+## Cài đặt trên Windows (không cần cài Python)
 
-1. Cài **Python 3.12** từ <https://www.python.org/downloads/> — khi cài nhớ tick **“Add python.exe to PATH”**.
-2. Tải mã nguồn về:
-   ```bash
-   git clone https://github.com/anphamarc/Translator.git
-   ```
-3. Mở thư mục `Translator`, nhấp đúp **`install.bat`**. Script sẽ tạo môi trường `.venv`, cài thư viện và tải mô hình (khoảng 1–2 GB, chỉ cần Internet **một lần**).
-4. Từ đó về sau, nhấp đúp **`run.bat`** để mở ứng dụng — không cần mạng.
+1. Tải tệp **`Translator-windows.zip`**:
+   - Bản phát hành ổn định: mục **Releases** ở trang GitHub của repo.
+   - Bản mới nhất đang phát triển: thẻ **Actions** → chọn lần chạy **Build Windows app** mới nhất có dấu ✅ → kéo xuống mục **Artifacts** → bấm **Translator-windows** (cần đăng nhập GitHub). Tệp tải về là một zip chứa `Translator-windows.zip`, giải nén thêm một lần nữa.
+2. Giải nén ra một thư mục, ví dụ `C:\Translator`.
+3. Nhấp đúp **`Translator.exe`**. Nếu Windows hiện cảnh báo “Windows protected your PC”, bấm **More info → Run anyway** (do ứng dụng chưa được ký số).
 
-### Dùng trên máy không có Internet
+Bản đóng gói đã kèm sẵn toàn bộ mô hình, nên **chạy offline ngay**, không cần Internet. Muốn chuyển sang máy khác thì chép nguyên thư mục.
 
-Cài đặt trên một máy có mạng, rồi chép **cả thư mục `Translator`** (gồm `.venv` và `data`) sang máy kia. Mô hình được lưu trong thư mục `data/` cạnh mã nguồn.
+### Cài từ mã nguồn (cho nhà phát triển)
 
-Hoặc tải các tệp `.argosmodel` (en→ko, ko→en, en→vi, vi→en) ở máy khác, rồi vào thẻ **⚙ Mô hình → Cài từ tệp .argosmodel…**.
+Cần Python 3.12: nhấp đúp `install.bat` để cài, sau đó dùng `run.bat` để chạy. Nếu máy không có mạng, có thể tải các tệp `.argosmodel` ở máy khác rồi vào thẻ **⚙ Mô hình → Cài từ tệp .argosmodel…**.
+
+### Tự đóng gói
+
+Mỗi lần đẩy code lên GitHub, workflow `.github/workflows/build-windows.yml` sẽ tự build bản Windows, tải mô hình, chạy tự kiểm tra (dịch thật và OCR thật), rồi nén thành `Translator-windows.zip`. Khi đẩy một tag dạng `v0.1.0`, tệp zip sẽ được đăng lên mục Releases.
 
 ## Chạy từ dòng lệnh (macOS / Linux / nhà phát triển)
 
@@ -67,6 +69,8 @@ translator_app/
   ocr.py             # nhận dạng chữ trong ảnh và vẽ bản dịch lên ảnh
   file_translate.py  # dịch từng loại tệp, giữ định dạng
   gui/               # giao diện: cửa sổ chính, các thẻ, kiểu dáng
+  selftest.py        # tự kiểm tra bản đóng gói: Translator.exe --selftest
+packaging/           # cấu hình PyInstaller để đóng gói thành .exe
 tests/               # kiểm thử tự động (dùng bộ dịch giả, không cần mô hình)
 ```
 

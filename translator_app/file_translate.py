@@ -133,7 +133,8 @@ def _translate_docx(path: Path, out: Path, src, dst, progress, cancelled) -> Non
     doc = docx.Document(str(path))
     containers = [doc]
     for section in doc.sections:
-        containers += [section.header, section.footer]
+        # Chi lay dau/chan trang da co; truy cap phan chua co se tao moi no
+        containers += [hf for hf in (section.header, section.footer) if not hf.is_linked_to_previous]
     segments, seen = [], set()
     for c in containers:
         for p in _docx_paragraphs(c):

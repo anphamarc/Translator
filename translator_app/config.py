@@ -21,6 +21,7 @@ def _default_data_dir() -> Path:
 DATA_DIR = Path(os.environ.get("TRANSLATOR_DATA_DIR") or _default_data_dir())
 ARGOS_DIR = DATA_DIR / "argos-packages"
 OCR_DIR = DATA_DIR / "ocr-models"
+MINISBD_DIR = DATA_DIR / "minisbd"
 
 
 def prepare_environment() -> None:
@@ -28,8 +29,22 @@ def prepare_environment() -> None:
 
     Phai goi truoc khi import argostranslate.
     """
-    for d in (DATA_DIR, ARGOS_DIR, OCR_DIR):
+    for d in (DATA_DIR, ARGOS_DIR, OCR_DIR, MINISBD_DIR):
         d.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("ARGOS_PACKAGES_DIR", str(ARGOS_DIR))
     # Chay tren CPU de tuong thich moi may
     os.environ.setdefault("ARGOS_DEVICE_TYPE", "cpu")
+    # Tach cau bang MiniSBD (mo hinh nho, tai san vao data/) thay vi Stanza,
+    # vi Stanza co the tu truy cap mang khi khoi tao.
+    os.environ.setdefault("ARGOS_CHUNK_TYPE", "MINISBD")
+
+
+def import_argos():
+    """Import Argos Translate va tro bo nho dem MiniSBD vao thu muc data/."""
+    prepare_environment()
+    import argostranslate.package
+    import argostranslate.translate
+    import minisbd.models
+
+    minisbd.models.cache_dir = str(MINISBD_DIR)
+    return argostranslate

@@ -48,6 +48,17 @@ def test_docx(tmp_path, fake_engine):
     assert out.sections[0].header.paragraphs[0].text == "[en>ko] Header"
 
 
+def test_docx_does_not_add_missing_header(tmp_path, fake_engine):
+    import docx
+
+    d = docx.Document()
+    d.add_paragraph("Hello")
+    f = tmp_path / "d.docx"
+    d.save(f)
+    out = docx.Document(str(translate_file(f, "en", "vi")))
+    assert out.sections[0].header.is_linked_to_previous
+
+
 def test_pptx(tmp_path, fake_engine):
     from pptx import Presentation
     from pptx.util import Inches

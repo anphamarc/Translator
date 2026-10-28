@@ -32,20 +32,20 @@ def missing_pairs() -> list[tuple[str, str]]:
     return [p for p in REQUIRED_PAIRS if p not in installed]
 
 
+def translation_ready() -> bool:
+    return not missing_pairs() and sentence_models_installed()
+
+
 def install_from_file(path: str | Path) -> None:
     """Cai goi .argosmodel da tai san (dung khi may khong co Internet)."""
-    config.prepare_environment()
-    import argostranslate.package as pkg
-
-    pkg.install_from_path(Path(path))
+    config.import_argos().package.install_from_path(Path(path))
     get_engine().reload()
 
 
 def download_translation_models(log: LogFn = print) -> None:
     """Tai va cai cac goi dich con thieu (can Internet)."""
-    config.prepare_environment()
-    import argostranslate.package as pkg
-
+    pkg = config.import_argos().package
+    _download_sentence_models(log)
     todo = missing_pairs()
     if not todo:
         log("Mô hình dịch đã đủ.")
@@ -62,6 +62,20 @@ def download_translation_models(log: LogFn = print) -> None:
         pkg.install_from_path(p.download())
         log("  ✓ Xong")
     get_engine().reload()
+
+
+def _download_sentence_models(log: LogFn) -> None:
+    """Mo hinh tach cau MiniSBD; Argos se tu tai luc dich neu thieu (can mang)."""
+    config.import_argos()  # tro bo nho dem MiniSBD vao data/
+    import minisbd.models
+
+    if not sentence_models_installed():
+        log("Đang tải mô hình tách câu…")
+        minisbd.models.download_models(load_only=list(LANGUAGES))
+
+
+def sentence_models_installed() -> bool:
+    return all((config.MINISBD_DIR / f"{code}.onnx").exists() for code in LANGUAGES)
 
 
 def download_ocr_models(log: LogFn = print) -> None:

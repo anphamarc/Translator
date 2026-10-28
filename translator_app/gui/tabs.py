@@ -634,6 +634,7 @@ class ModelTab(QWidget):
             from translator_app import models
 
             rows = [(s.label, s.installed) for s in models.translation_status()]
+            rows.append(("Tách câu (Anh/Hàn/Việt)", models.sentence_models_installed()))
             rows.append(("Nhận dạng chữ trong ảnh (Anh/Hàn/Việt)", models.ocr_installed()))
             return rows
 

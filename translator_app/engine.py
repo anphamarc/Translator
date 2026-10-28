@@ -124,8 +124,7 @@ class ArgosEngine(TranslationEngine):
         self._translations: dict[tuple[str, str], object] = {}
 
     def installed_pairs(self) -> set[tuple[str, str]]:
-        import argostranslate.package as pkg
-
+        pkg = config.import_argos().package
         return {
             (p.from_code, p.to_code)
             for p in pkg.get_installed_packages()
@@ -139,8 +138,7 @@ class ArgosEngine(TranslationEngine):
     def _get(self, src: str, dst: str):
         key = (src, dst)
         if key not in self._translations:
-            import argostranslate.translate as tr
-
+            tr = config.import_argos().translate
             if (src, dst) not in self.installed_pairs():
                 # Dich qua trung gian tieng Anh, vd. ko -> en -> vi
                 first, second = self._get(src, "en"), self._get("en", dst)
