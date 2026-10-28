@@ -100,4 +100,10 @@ def download_all(log: LogFn = print) -> None:
 
 
 if __name__ == "__main__":
+    import sys
+
+    # Console Windows mac dinh khong in duoc tieng Viet co dau
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     download_all()
